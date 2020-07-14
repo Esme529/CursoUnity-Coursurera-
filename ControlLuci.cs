@@ -10,6 +10,7 @@ public class ControlLuci : MonoBehaviour
     Animator aniLuci;
     public float maxVel = 5f;
     bool haciaDerecha = true;
+    bool enFire1 = false;
     ControlCactus CtrCactus = null;
 
     public Slider slider; //no, hacer desaparecer corazones
@@ -23,12 +24,21 @@ public class ControlLuci : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if(Mathf.Abs(Input.GetAxis("Fire1"))>0.01f)
+        if (Mathf.Abs(Input.GetAxis("Fire1")) > 0.01f)
         {
-            aniLuci.SetTrigger("atacarDePie");
-            if (CtrCactus != null)
-                CtrCactus.GolpeLuci();
+            if (enFire1 == false)
+            {
+                enFire1 = true;
+                aniLuci.SetTrigger("atacarDePie");
+                if (CtrCactus != null)
+                    CtrCactus.GolpeLuci();
+            }
+            else
+                enFire1 = false;
+
         }
+        else if (aniLuci.GetCurrentAnimatorStateInfo(0).IsName("Atacar_pie"))
+            aniLuci.SetTrigger("velocidad");
     }
 
     void FixedUpdate()
