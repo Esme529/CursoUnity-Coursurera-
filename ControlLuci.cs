@@ -12,13 +12,22 @@ public class ControlLuci : MonoBehaviour
     bool haciaDerecha = true;
     bool enFire1 = false;
     ControlCactus CtrCactus = null;
+    int energy;
+    public GameObject arma = null;
+    public Text txtSalud;
 
-    public Slider slider; //no, hacer desaparecer corazones
+    //public Slider slider; //no, hacer desaparecer corazones
+
+    public int costHitAir = 1;
+    public int costHitCactus = 3;
+    public int prizeTree = 15;
     
     void Start()
     {
         rgb = GetComponent<Rigidbody2D>();
         aniLuci = GetComponent<Animator>();
+        arma = GameObject.Find("/Luci/arma");
+        energy = 100;
     }
 
     // Update is called once per frame
@@ -29,16 +38,46 @@ public class ControlLuci : MonoBehaviour
             if (enFire1 == false)
             {
                 enFire1 = true;
+                arma.GetComponent<CircleCollider2D>().enabled = false;
                 aniLuci.SetTrigger("atacarDePie");
                 if (CtrCactus != null)
-                    CtrCactus.GolpeLuci();
+                {
+                    if (CtrCactus.GolpeLuci())
+                    {
+                        energy += prizeTree;
+                        if (energy > 100)
+                            energy = 100;
+                    }
+                    else
+                        energy -= costHitCactus;
+                }
+
+                else
+                    energy -= costHitAir;
+                
             }
-            else
-                enFire1 = false;
+            
 
         }
-        else if (aniLuci.GetCurrentAnimatorStateInfo(0).IsName("Atacar_pie"))
-            aniLuci.SetTrigger("velocidad");
+        else
+            enFire1 = false;
+        if (aniLuci.GetCurrentAnimatorStateInfo(0).IsName("Atacar_pie"))
+            aniLuci.SetTrigger("dejarAtacar");
+
+        if(energy<=35||energy<=70)
+        {
+            if (ControlVidaLuci.controlVidaLuci != null)
+                ControlVidaLuci.controlVidaLuci.reducirVida();
+            if (energy == 0)
+                Destroy(gameObject);
+        }
+        txtSalud.text = energy.ToString();
+
+    }
+
+    public void HabilitarTriggerArma() //para llamar en la salida del estado atacar 
+    {
+        arma.GetComponent<CircleCollider2D>().enabled = true;
     }
 
     void FixedUpdate()
@@ -69,21 +108,6 @@ public class ControlLuci : MonoBehaviour
         transform.localScale = s;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.name.Equals("cactus"))
-        {
-            SetCrlCactus(other.gameObject.GetComponent<ControlCactus>());
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.gameObject.name.Equals("cactus"))
-        {
-            SetCrlCactus(null);
-        }
-    }
 
     public void SetCrlCactus(ControlCactus ctr)
     {
