@@ -27,6 +27,6 @@ public class ControlCactus : MonoBehaviour
             anim.SetTrigger("caer");
             resp = true;
         }
-        return true;
+        return resp;
     }
 }

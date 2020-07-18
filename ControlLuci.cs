@@ -10,11 +10,16 @@ public class ControlLuci : MonoBehaviour
     Animator aniLuci;
     public float maxVel = 5f;
     bool haciaDerecha = true;
+    public float jumpForce = 20f, Radio = 0.5f;
+    public Transform pie;
+    public LayerMask sueloLayer;
+    public bool saltar;
     bool enFire1 = false;
     ControlCactus CtrCactus = null;
     int energy;
     public GameObject arma = null;
     public Text txtSalud;
+    public bool daño = true;
 
     //public Slider slider; //no, hacer desaparecer corazones
 
@@ -38,7 +43,6 @@ public class ControlLuci : MonoBehaviour
             if (enFire1 == false)
             {
                 enFire1 = true;
-                arma.GetComponent<CircleCollider2D>().enabled = false;
                 aniLuci.SetTrigger("atacarDePie");
                 if (CtrCactus != null)
                 {
@@ -47,32 +51,48 @@ public class ControlLuci : MonoBehaviour
                         energy += prizeTree;
                         if (energy > 100)
                             energy = 100;
+                        arma.GetComponent<CircleCollider2D>().enabled = false;
                     }
                     else
+                    {
                         energy -= costHitCactus;
+                        if (energy <= 35 || energy <= 70)
+                        {
+                            if (ControlVidaLuci.controlVidaLuci != null)
+                                ControlVidaLuci.controlVidaLuci.reducirVida();
+                            if (energy == 0)
+                                Destroy(gameObject);
+                        }
+                    }
+                        
                 }
 
                 else
+                {
                     energy -= costHitAir;
-                
+                    if (energy == 35 || energy == 70)
+                    {
+                        if (ControlVidaLuci.controlVidaLuci != null)
+                            ControlVidaLuci.controlVidaLuci.reducirVida();
+                        if (energy == 0)
+                            Destroy(gameObject);
+                    }
+                }
+                    
             }
-            
-
         }
         else
             enFire1 = false;
         if (aniLuci.GetCurrentAnimatorStateInfo(0).IsName("Atacar_pie"))
             aniLuci.SetTrigger("dejarAtacar");
 
-        if(energy<=35||energy<=70)
-        {
-            if (ControlVidaLuci.controlVidaLuci != null)
-                ControlVidaLuci.controlVidaLuci.reducirVida();
-            if (energy == 0)
-                Destroy(gameObject);
-        }
+        
         txtSalud.text = energy.ToString();
 
+        if (Input.GetKeyDown(KeyCode.UpArrow) && Physics2D.OverlapCircle(pie.position, Radio, sueloLayer))
+        {
+            saltar = true;
+        }
     }
 
     public void HabilitarTriggerArma() //para llamar en la salida del estado atacar 
@@ -99,6 +119,12 @@ public class ControlLuci : MonoBehaviour
             haciaDerecha = true;
             Flip();
         }
+
+        if(saltar)
+        {
+            rgb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            saltar = false;
+        }
     }
 
     void Flip()
@@ -113,4 +139,24 @@ public class ControlLuci : MonoBehaviour
     {
         CtrCactus = ctr;
     }
+
+    //public void OnTriggerEnter2D(Collider2D collision)
+    //{
+    //    if(!daño)
+    //        return;
+    //    if((collision.CompareTag("Abeja")) || collision.CompareTag("cactus"))
+    //    {
+    //        daño = false;
+    //        if (energy <= 35 || energy <= 70)
+    //        {
+    //            if (ControlVidaLuci.controlVidaLuci != null)
+    //                ControlVidaLuci.controlVidaLuci.reducirVida();
+    //            if (energy == 0)
+    //                Destroy(gameObject);
+    //        }
+    //    }
+        
+        
+        
+    //}
 }
