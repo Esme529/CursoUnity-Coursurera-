@@ -11,7 +11,8 @@ public class ControlEnemio : MonoBehaviour
     Animator animEnem; //referencia a nuestro animator
     public Slider slider;
     public Text txt;
-    public float energy = 100f;
+    public int energy = 100;
+    public int LuciCollision = 10;
 
     void Start()
     {
@@ -21,6 +22,11 @@ public class ControlEnemio : MonoBehaviour
 
     void Update()
     {
+        if(energy<=0)
+        {
+            energy = 0;
+            animEnem.SetTrigger("Morir");
+        }
         slider.value = energy;
         txt.text = energy.ToString();
     }
@@ -45,7 +51,15 @@ public class ControlEnemio : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other) //Para el trigger 
     {
-        Flip();
+        if(other.gameObject.name.Equals("Luci"))
+        {
+            ControlLuci controlLuci = other.gameObject.GetComponent<ControlLuci>();
+            animEnem.SetTrigger("Atacar");
+            if (controlLuci != null)
+                controlLuci.RecibirAtaque();
+        }
+        else
+            Flip();
     }
 
     void Flip() //Metodo que cambia el sentido
@@ -54,5 +68,10 @@ public class ControlEnemio : MonoBehaviour
         var s = transform.localScale;//por medio de var hacemos que s tenga el mismo tipo de lo que está a la derecha de la asignación
         s.x *= -1; //cambiamos el valor de la escala en x para cambiar el sentido
         transform.localScale = s;
+    }
+
+    public void BajarPuntosLuciCerca()
+    {
+        energy -= LuciCollision;
     }
 } 

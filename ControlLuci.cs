@@ -10,10 +10,14 @@ public class ControlLuci : MonoBehaviour
     Animator aniLuci;
     public float maxVel = 5f;
     bool haciaDerecha = true;
-    public float jumpForce = 20f, Radio = 0.5f;
+
+    public float jumpForce = 7f, Radio = 0.5f;
     public Transform pie;
     public LayerMask sueloLayer;
     public bool saltar;
+    //Vector2 JumpForce;
+    //bool jumping = false;
+
     bool enFire1 = false;
     ControlCactus CtrCactus = null;
     int energy;
@@ -26,6 +30,7 @@ public class ControlLuci : MonoBehaviour
     public int costHitAir = 1;
     public int costHitCactus = 3;
     public int prizeTree = 15;
+    public int costAttack = 15;
     
     void Start()
     {
@@ -38,6 +43,17 @@ public class ControlLuci : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (!aniLuci.GetCurrentAnimatorStateInfo(0).IsName("Muriendo"))
+        {
+            if (energy <= 0)
+            {
+                aniLuci.SetTrigger("morir");
+                energy = 0;
+            }
+        }
+        else
+            return;
+
         if (Mathf.Abs(Input.GetAxis("Fire1")) > 0.01f)
         {
             if (enFire1 == false)
@@ -56,13 +72,7 @@ public class ControlLuci : MonoBehaviour
                     else
                     {
                         energy -= costHitCactus;
-                        if (energy <= 35 || energy <= 70)
-                        {
-                            if (ControlVidaLuci.controlVidaLuci != null)
-                                ControlVidaLuci.controlVidaLuci.reducirVida();
-                            if (energy == 0)
-                                Destroy(gameObject);
-                        }
+                        
                     }
                         
                 }
@@ -70,15 +80,7 @@ public class ControlLuci : MonoBehaviour
                 else
                 {
                     energy -= costHitAir;
-                    if (energy == 35 || energy == 70)
-                    {
-                        if (ControlVidaLuci.controlVidaLuci != null)
-                            ControlVidaLuci.controlVidaLuci.reducirVida();
-                        if (energy == 0)
-                            Destroy(gameObject);
-                    }
                 }
-                    
             }
         }
         else
@@ -92,6 +94,12 @@ public class ControlLuci : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow) && Physics2D.OverlapCircle(pie.position, Radio, sueloLayer))
         {
             saltar = true;
+        }
+
+        if (energy <= 70)
+        {
+            if (ControlVidaLuci.controlVidaLuci != null)
+                ControlVidaLuci.controlVidaLuci.reducirVida(energy);
         }
     }
 
@@ -125,6 +133,20 @@ public class ControlLuci : MonoBehaviour
             rgb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             saltar = false;
         }
+
+        //otro metodo para saltar
+        //if (Input.GetAxis("Jump") > 0.01f)
+        //{
+        //    if (!jumping)
+        //    {
+        //        jumping = true;
+        //        JumpForce.x = 0f;
+        //        JumpForce.y = jumpForce;
+        //        rgb.AddForce(JumpForce);
+        //    }
+        //}
+        //else
+        //    jumping = false; //por el momento esto debe ser despues de terminar la animación
     }
 
     void Flip()
@@ -140,23 +162,8 @@ public class ControlLuci : MonoBehaviour
         CtrCactus = ctr;
     }
 
-    //public void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    if(!daño)
-    //        return;
-    //    if((collision.CompareTag("Abeja")) || collision.CompareTag("cactus"))
-    //    {
-    //        daño = false;
-    //        if (energy <= 35 || energy <= 70)
-    //        {
-    //            if (ControlVidaLuci.controlVidaLuci != null)
-    //                ControlVidaLuci.controlVidaLuci.reducirVida();
-    //            if (energy == 0)
-    //                Destroy(gameObject);
-    //        }
-    //    }
-        
-        
-        
-    //}
+    public void RecibirAtaque()
+    {
+        energy -= costAttack;
+    }
 }
